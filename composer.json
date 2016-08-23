@@ -1,0 +1,24 @@
+{
+    "name" : "aescarcha/business",
+    "description" : "A bundle providing a RESTful API to handle business",
+    "type" : "symfony-bundle",
+    "authors" : [{
+        "name" : "Álvaro Escarcha"
+    }],
+    "keywords" : [
+        "symfony", "business"
+    ],
+    "license" : [
+        "MIT"
+    ],
+    "require" : {
+        "php": ">=5.5.9"
+    },
+    "autoload" : {
+        "psr-0" : {
+            "Aescarcha\\BusinessBundle" : ""
+        }
+    },
+    "minimum-stability": "dev",
+    "target-dir" : "Aescarcha/BusinessBundle"
+}

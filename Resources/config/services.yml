@@ -1,0 +1,4 @@
+services:
+#    aescarcha_business.example:
+#        class: Aescarcha\BusinessBundle\Example
+#        arguments: ["@service_id", "plain_value", %parameter%]
