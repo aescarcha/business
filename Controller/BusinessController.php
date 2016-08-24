@@ -5,6 +5,13 @@ namespace Aescarcha\BusinessBundle\Controller;
 use FOS\RestBundle\Controller\FOSRestController;
 use Symfony\Component\HttpFoundation\Request;
 use Aescarcha\BusinessBundle\Entity\Business;
+use Aescarcha\BusinessBundle\Transformer\BusinessTransformer;
+use Aescarcha\BusinessBundle\Transformer\ErrorTransformer;
+
+use League\Fractal\Manager;
+use League\Fractal\Resource\Item;
+use League\Fractal\Resource\Collection;
+use League\Fractal\Serializer\ArraySerializer;
 
 class BusinessController extends FOSRestController
 {
@@ -22,6 +29,7 @@ class BusinessController extends FOSRestController
     {
         $entity = new Business();
         $validator = $this->get('validator');
+        $fractal = new Manager();
 
         $entity->setName($request->request->get('name'));
         $entity->setDescription($request->request->get('description'));
@@ -33,10 +41,16 @@ class BusinessController extends FOSRestController
             $em = $this->getDoctrine()->getManager();
             $em->persist($entity);
             $em->flush();
-            $view = $this->view($entity, 200);
+            $resource = new Item($entity, new BusinessTransformer);
+            $view = $this->view($fractal->createData($resource)->toArray(), 201);
             return $this->handleView($view);
         }
-        $view = $this->view($errors, 409);
+
+        //This serializer won't set the "data" namespace for errors
+        $fractal->setSerializer(new ArraySerializer());
+        $resource = new Item($errors->get(0), new ErrorTransformer);
+        $view = $this->view($fractal->createData($resource)->toArray(), 400);
+
         return $this->handleView($view);
     }
 
