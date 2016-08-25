@@ -4,6 +4,7 @@ namespace Aescarcha\BusinessBundle\Controller;
 
 use FOS\RestBundle\Controller\FOSRestController;
 use Symfony\Component\HttpFoundation\Request;
+
 use Aescarcha\BusinessBundle\Entity\Business;
 use Aescarcha\BusinessBundle\Transformer\BusinessTransformer;
 use Aescarcha\BusinessBundle\Transformer\ErrorTransformer;
@@ -13,6 +14,8 @@ use League\Fractal\Resource\Item;
 use League\Fractal\Resource\Collection;
 use League\Fractal\Serializer\ArraySerializer;
 
+use Nelmio\ApiDocBundle\Annotation\ApiDoc;
+
 class BusinessController extends FOSRestController
 {
     public function getBusinessesAction()
@@ -20,6 +23,18 @@ class BusinessController extends FOSRestController
         return $this->render('AescarchaBusinessBundle:Default:index.html.twig');
     }
 
+    /**
+     * @ApiDoc(
+     *  resource=true,
+     *  description="Create a new Business Object",
+     *  input="Aescarcha\BusinessBundle\Entity\Business",
+     *  output="Aescarcha\BusinessBundle\Entity\Business",
+     *  statusCodes={
+     *         201="Returned when create is successful",
+     *         400="Returned when data is invalid",
+     *     }
+     * )
+     */
     public function postBusinessesAction( Request $request )
     {
         return $this->newAction( $request );
