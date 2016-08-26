@@ -45,4 +45,38 @@ class BusinessControllerTest extends WebTestCase
         $this->assertEquals( '', $response['error']['doc_url'] );
     }
 
+    public function testGet()
+    {
+        $client = static::createClient();
+
+        $crawler = $client->request(
+                         'GET',
+                         '/businesses/1',
+                         array(),
+                         array(),
+                         array('CONTENT_TYPE' => 'application/json'));
+
+        // $this->assertEquals(200, $client->getResponse()->getStatusCode());
+        $response = json_decode($client->getResponse()->getContent(), true);
+        dump($response);
+        $this->assertEquals( 'Fixtured business', $response['data']['name'] );
+        $this->assertEquals( 'Fake description', $response['data']['description'] );
+        $this->assertContains( '/businesses/1', $response['data']['links']['self']['uri'] );
+    }
+
+
+    public function testGetNotFound()
+    {
+        $client = static::createClient();
+
+        $crawler = $client->request(
+                         'GET',
+                         '/businesses/11112',
+                         array(),
+                         array(),
+                         array('CONTENT_TYPE' => 'application/json'));
+
+        $this->assertEquals(404, $client->getResponse()->getStatusCode());
+    }
+
 }

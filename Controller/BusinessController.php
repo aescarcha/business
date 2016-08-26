@@ -40,6 +40,26 @@ class BusinessController extends FOSRestController
         return $this->newAction( $request );
     }
 
+    /**
+     * @ApiDoc(
+     *  resource=true,
+     *  description="Finds an displays a Business entity",
+     *  output="Aescarcha\BusinessBundle\Entity\Business",
+     *  statusCodes={
+     *         200="Returned when entity exists",
+     *         404="Returned when entity is not found",
+     *     }
+     * )
+     */
+    public function showAction(Business $entity)
+    {
+        $fractal = new Manager();
+        $resource = new Item($entity, new BusinessTransformer);
+        $view = $this->view($fractal->createData($resource)->toArray(), 200);
+        return $this->handleView($view);
+    }
+
+
     protected function newAction( Request $request )
     {
         $entity = new Business();
