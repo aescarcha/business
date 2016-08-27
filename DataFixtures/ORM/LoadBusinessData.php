@@ -10,7 +10,7 @@ class LoadBusinessData implements FixtureInterface
     protected $data = [
         [
             'name' => 'Fixtured business',
-            'description' => 'fake descrption',
+            'description' => 'Fake description',
         ]
     ];
 
