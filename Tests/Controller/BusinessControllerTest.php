@@ -78,6 +78,24 @@ class BusinessControllerTest extends WebTestCase
         $this->assertEquals(404, $this->client->getResponse()->getStatusCode());
     }
 
+    public function testIndex()
+    {
+        $crawler = $this->client->request(
+                         'GET',
+                         '/businesses',
+                         array(),
+                         array(),
+                         array('CONTENT_TYPE' => 'application/json'));
+
+        $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
+        $response = json_decode($this->client->getResponse()->getContent(), true);
+        $this->assertGreaterThan(0, count($response['data']));
+        $this->assertEquals( 'Fixtured business', $response['data'][0]['name'] );
+        $this->assertEquals( 'Fake description', $response['data'][0]['description'] );
+        $this->assertContains( '/businesses/', $response['data'][0]['links']['self']['uri'] );
+    }
+
+
     private function getOneEntity()
     {
         return $this->manager->getRepository('AescarchaBusinessBundle:Business')->findAll()[0];

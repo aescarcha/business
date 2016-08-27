@@ -49,10 +49,31 @@ class BusinessController extends FOSRestController
      *     }
      * )
      */
-    public function getBusinessesAction(Business $entity)
+    public function getBusinessAction(Business $entity)
     {
         $fractal = new Manager();
         $resource = new Item($entity, new BusinessTransformer);
+        $view = $this->view($fractal->createData($resource)->toArray(), 200);
+        return $this->handleView($view);
+    }
+
+    /**
+     * @ApiDoc(
+     *  resource=true,
+     *  description="Retrieves a list of Business entities",
+     *  output="Aescarcha\BusinessBundle\Entity\Business",
+     *  statusCodes={
+     *         200="Returned when entity exists",
+     *         404="Returned when entity is not found",
+     *     }
+     * )
+     */
+    public function getBusinessesAction()
+    {
+        $fractal = new Manager();
+        $businesses = $this->getDoctrine()->getManager()->getRepository('AescarchaBusinessBundle:Business');
+        $entities = $businesses->findAll();
+        $resource = new Collection($entities, new BusinessTransformer);
         $view = $this->view($fractal->createData($resource)->toArray(), 200);
         return $this->handleView($view);
     }
