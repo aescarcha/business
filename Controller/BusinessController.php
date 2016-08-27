@@ -18,11 +18,6 @@ use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 
 class BusinessController extends FOSRestController
 {
-    public function getBusinessesAction()
-    {
-        return $this->render('AescarchaBusinessBundle:Default:index.html.twig');
-    }
-
     /**
      * @ApiDoc(
      *  resource=true,
@@ -45,13 +40,16 @@ class BusinessController extends FOSRestController
      *  resource=true,
      *  description="Finds an displays a Business entity",
      *  output="Aescarcha\BusinessBundle\Entity\Business",
+     *  requirements={
+     *      {"name"="entity", "dataType"="uuid", "description"="Unique id of the business entity"}
+     *  },
      *  statusCodes={
      *         200="Returned when entity exists",
      *         404="Returned when entity is not found",
      *     }
      * )
      */
-    public function showAction(Business $entity)
+    public function getBusinessesAction(Business $entity)
     {
         $fractal = new Manager();
         $resource = new Item($entity, new BusinessTransformer);

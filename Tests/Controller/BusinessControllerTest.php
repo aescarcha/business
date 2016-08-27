@@ -6,19 +6,22 @@ use Liip\FunctionalTestBundle\Test\WebTestCase;
 
 class BusinessControllerTest extends WebTestCase
 {
+    protected $manager;
+    protected $client;
+
     public function setUp()
     {
         $classes = array(
             'Aescarcha\BusinessBundle\DataFixtures\ORM\LoadBusinessData',
         );
         $this->loadFixtures($classes);
+        $this->client = static::createClient();
+        $this->manager = $this->client->getContainer()->get('doctrine.orm.entity_manager');
     }
 
     public function testCreate()
     {
-        $client = static::createClient();
-
-        $crawler = $client->request(
+        $crawler = $this->client->request(
                          'POST',
                          '/businesses',
                          array(),
@@ -26,18 +29,17 @@ class BusinessControllerTest extends WebTestCase
                          array('CONTENT_TYPE' => 'application/json'),
                          '{"name":"my unit test"}'
                          );
-        $this->assertEquals(201, $client->getResponse()->getStatusCode());
-        $response = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(201, $this->client->getResponse()->getStatusCode());
+        $response = json_decode($this->client->getResponse()->getContent(), true);
         $this->assertEquals( 'my unit test', $response['data']['name'] );
         $this->assertContains( '/businesses/', $response['data']['links']['self']['uri'] );
     }
 
     public function testCreateNoData()
     {
-        $client = static::createClient();
-        $crawler = $client->request('POST', '/businesses', [], [], array('CONTENT_TYPE' => 'application/json'), '{"description":"my unit test"}');
-        $this->assertEquals(400, $client->getResponse()->getStatusCode());
-        $response = json_decode($client->getResponse()->getContent(), true);
+        $crawler = $this->client->request('POST', '/businesses', [], [], array('CONTENT_TYPE' => 'application/json'), '{"description":"my unit test"}');
+        $this->assertEquals(400, $this->client->getResponse()->getStatusCode());
+        $response = json_decode($this->client->getResponse()->getContent(), true);
         $this->assertEquals( 'Symfony\Component\Validator\ConstraintViolation', $response['error']['type'] );
         $this->assertEquals( 'c1051bb4-d103-4f74-8988-acbcafc7fdc3', $response['error']['code'] );
         $this->assertEquals( 'name', $response['error']['property'] );
@@ -47,36 +49,38 @@ class BusinessControllerTest extends WebTestCase
 
     public function testGet()
     {
-        $client = static::createClient();
+        $id = $this->getOneEntity()->getId();
 
-        $crawler = $client->request(
+        $crawler = $this->client->request(
                          'GET',
-                         '/businesses/1',
+                         '/businesses/' . $id,
                          array(),
                          array(),
                          array('CONTENT_TYPE' => 'application/json'));
 
-        // $this->assertEquals(200, $client->getResponse()->getStatusCode());
-        $response = json_decode($client->getResponse()->getContent(), true);
-        dump($response);
+        $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
+        $response = json_decode($this->client->getResponse()->getContent(), true);
         $this->assertEquals( 'Fixtured business', $response['data']['name'] );
         $this->assertEquals( 'Fake description', $response['data']['description'] );
-        $this->assertContains( '/businesses/1', $response['data']['links']['self']['uri'] );
+        $this->assertEquals( '/businesses/' . $id, $response['data']['links']['self']['uri'] );
     }
 
 
     public function testGetNotFound()
     {
-        $client = static::createClient();
-
-        $crawler = $client->request(
+        $crawler = $this->client->request(
                          'GET',
                          '/businesses/11112',
                          array(),
                          array(),
                          array('CONTENT_TYPE' => 'application/json'));
 
-        $this->assertEquals(404, $client->getResponse()->getStatusCode());
+        $this->assertEquals(404, $this->client->getResponse()->getStatusCode());
+    }
+
+    private function getOneEntity()
+    {
+        return $this->manager->getRepository('AescarchaBusinessBundle:Business')->findAll()[0];
     }
 
 }
