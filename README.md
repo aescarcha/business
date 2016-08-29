@@ -22,7 +22,8 @@ Step 2: Install Requirements
     composer require jms/serializer-bundle
     composer require nelmio/api-doc-bundle
     composer require friendsofsymfony/user-bundle
-    composer require friendsofsymfony/oauth-server-bundle
+    composer require aescarcha/user-bundle dev-master
+    composer require league/fractal
 
 
 Step 3: Enable the Bundle
@@ -44,9 +45,9 @@ class AppKernel extends Kernel
             // ...
             new FOS\RestBundle\FOSRestBundle(),
             new FOS\UserBundle\FOSUserBundle(),
-            new FOS\OAuthServerBundle\FOSOAuthServerBundle(),
             new JMS\SerializerBundle\JMSSerializerBundle(),
             new Nelmio\ApiDocBundle\NelmioApiDocBundle(),
+            new Aescarcha\UserBundle\AescarchaUserBundle(),
             new Aescarcha\BusinessBundle\AescarchaBusinessBundle(),
         );
 
@@ -61,6 +62,7 @@ Step 4: Configure the Bundle
 -------------------------
 
 Enable the routes in `app/config/routing.yml`
+
     aescarcha_business:
         resource: "@AescarchaBusinessBundle/Resources/config/routing.yml"
         prefix:   /
@@ -77,21 +79,17 @@ Configure the bundles in `app/config/config.yml`
             include_format: false                           # We do not include format in request, so that all responses
                                                             # will eventually be JSON formated
 
+    body_listener:                                          # Decode full json bodies
+        decoders:
+             son: fos_rest.decoder.json
+
+
     fos_user:
         db_driver: orm
         firewall_name: api                                  # Seems to be used when registering user/reseting password,
                                                             # but since there is no "login", as so it seems to be useless in
                                                             # our particular context, but still required by "FOSUserBundle"
         user_class: FOS\UserBundle\Model\User
-
-    fos_oauth_server:
-        db_driver:           orm
-        client_class:        Acme\ApiBundle\Entity\Client
-        access_token_class:  Acme\ApiBundle\Entity\AccessToken
-        refresh_token_class: Acme\ApiBundle\Entity\RefreshToken
-        auth_code_class:     Acme\ApiBundle\Entity\AuthCode
-        service:
-            user_provider: fos_user.user_manager             # This property will be used when valid credentials are given to load the user upon access token creation
 
 Add this to `app/config/security.yml`
 
@@ -105,9 +103,6 @@ Add this to `app/config/security.yml`
             fos_userbundle:
                 id: fos_user.user_provider.username        # fos_user.user_provider.username_email does not seem to work (OAuth-spec related ("username + password") ?)
         firewalls:
-            oauth_token:                                   # Everyone can access the access token URL.
-                pattern: ^/oauth/v2/token
-                security: false
             api:
                 pattern: ^/                                # All URLs are protected
                 fos_oauth: true                            # OAuth2 protected resource
@@ -115,13 +110,38 @@ Add this to `app/config/security.yml`
                 anonymous: false                           # Anonymous access is not allowed
 
 
-Add the following to `app/config/routing.yml` :
+Add the following to `app/config/routing.yml` to be able to use the docs :
 
     # app/config/routing.yml
     NelmioApiDocBundle:
         resource: "@NelmioApiDocBundle/Resources/config/routing.yml"
         prefix:   /api/doc
 
-    fos_oauth_server_token:
-        resource: "@FOSOAuthServerBundle/Resources/config/routing/token.xml"
+
+
+
+Testing
+============
+
+To test this bundle, you need to download and enable the following bundles
+
+    "doctrine/doctrine-fixtures-bundle": "^2.3",
+    "liip/functional-test-bundle": "^1.6"
+
+    $bundles[] = new Doctrine\Bundle\FixturesBundle\DoctrineFixturesBundle();
+    $bundles[] = new Liip\FunctionalTestBundle\LiipFunctionalTestBundle();
+
+And I recommend using this config in `config_test.yml` to use sqlite
+
+    doctrine:
+        dbal:
+            default_connection: default
+            connections:
+                default:
+                    driver:   pdo_sqlite
+                    path:     %kernel.cache_dir%/test.db
+
+    liip_functional_test:
+        cache_sqlite_db: true
+
 
