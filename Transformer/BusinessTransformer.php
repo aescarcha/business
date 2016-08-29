@@ -9,7 +9,7 @@ class BusinessTransformer extends Fractal\TransformerAbstract
     public function transform( Business $business )
     {
         return [
-            'id'      => (int) $business->getId(),
+            'id'      => $business->getId(),
             'name'   => $business->getName(),
             'description'   => $business->getDescription(),
             'longitude'    => (float) $business->getLongitude(),

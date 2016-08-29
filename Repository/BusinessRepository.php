@@ -10,4 +10,24 @@ namespace Aescarcha\BusinessBundle\Repository;
  */
 class BusinessRepository extends \Doctrine\ORM\EntityRepository
 {
+    public function findByConditions( array $criteria, $returnQuery = true )
+    {
+        $qb = $this->createQueryBuilder('p');
+        foreach ($criteria as $field => $value) {
+            if($field === 'sort'){
+                if ($this->getClassMetadata()->hasField($value)) {
+                    $qb->addOrderBy('p.'.$value, 'DESC');
+                }
+            } else {
+                if(!$this->getClassMetadata()->hasField($field) && !$this->getClassMetadata()->hasAssociation($field)){
+                    continue;
+                }
+                $qb = is_array($value) ? $qb->andWhere($qb->expr()->in('p.'.$field, ':p_'.$field)) : $qb->andWhere($qb->expr()->eq('p.'.$field, ':p_'.$field));
+                $qb->setParameter('p_'.$field, $value);
+            }
+        }
+        
+        return $returnQuery ? $qb : $qb->getQuery()->getResult();
+
+    }
 }
