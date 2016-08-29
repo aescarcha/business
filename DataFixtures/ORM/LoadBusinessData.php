@@ -11,6 +11,10 @@ class LoadBusinessData implements FixtureInterface
         [
             'name' => 'Fixtured business',
             'description' => 'Fake description',
+        ],
+        [
+            'name' => 'Fixtured business2',
+            'description' => 'Fake description2',
         ]
     ];
 

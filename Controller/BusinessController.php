@@ -12,6 +12,7 @@ use Aescarcha\BusinessBundle\Transformer\ErrorTransformer;
 use League\Fractal\Manager;
 use League\Fractal\Resource\Item;
 use League\Fractal\Resource\Collection;
+use League\Fractal\Pagination\Cursor;
 use League\Fractal\Serializer\ArraySerializer;
 
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
@@ -65,15 +66,35 @@ class BusinessController extends FOSRestController
      *  statusCodes={
      *         200="Returned when entity exists",
      *         404="Returned when entity is not found",
+     *     },
+     *  parameters={
+     *      {"name"="cursor", "dataType"="integer", "required"=false, "description"="Current cursor"},
+     *      {"name"="previous", "dataType"="integer", "required"=false, "description"="Previous cursor"},
+     *      {"name"="count", "dataType"="integer", "required"=false, "description"="Entities per cursor"}
      *     }
      * )
      */
-    public function getBusinessesAction()
+    public function getBusinessesAction( Request $request )
     {
         $fractal = new Manager();
         $businesses = $this->getDoctrine()->getManager()->getRepository('AescarchaBusinessBundle:Business');
-        $entities = $businesses->findAll();
+
+        $currentCursor = $request->query->get('cursor', 0);
+        $previousCursor = $request->query->get('previous', 0);
+        $limit = $request->query->get('limit', 10);
+        $newCursor = $currentCursor + $limit;
+
+        $entities = $businesses->findByConditions($request->query->all())
+                            ->setFirstResult( $currentCursor )
+                            ->setMaxResults( $limit )
+                            ->getQuery()
+                            ->getResult(); //Maybe we should turn hydration off for listing queries
+
+        $cursor = new Cursor($currentCursor, $previousCursor, $newCursor, count($entities ));
+
         $resource = new Collection($entities, new BusinessTransformer);
+        $resource->setCursor($cursor);
+
         $view = $this->view($fractal->createData($resource)->toArray(), 200);
         return $this->handleView($view);
     }

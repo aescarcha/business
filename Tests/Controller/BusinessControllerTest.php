@@ -89,12 +89,52 @@ class BusinessControllerTest extends WebTestCase
 
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
         $response = json_decode($this->client->getResponse()->getContent(), true);
-        $this->assertGreaterThan(0, count($response['data']));
+        $this->assertGreaterThan(1, count($response['data']));
         $this->assertEquals( 'Fixtured business', $response['data'][0]['name'] );
         $this->assertEquals( 'Fake description', $response['data'][0]['description'] );
         $this->assertContains( '/businesses/', $response['data'][0]['links']['self']['uri'] );
     }
 
+
+    public function testIndexPagination()
+    {
+        $crawler = $this->client->request(
+                         'GET',
+                         '/businesses?limit=1',
+                         array(),
+                         array(),
+                         array('CONTENT_TYPE' => 'application/json'));
+
+        $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
+        $response = json_decode($this->client->getResponse()->getContent(), true);
+        $this->assertEquals(1, count($response['data']));
+        $this->assertEquals( 'Fixtured business', $response['data'][0]['name'] );
+        $this->assertEquals( 'Fake description', $response['data'][0]['description'] );
+        $this->assertContains( '/businesses/', $response['data'][0]['links']['self']['uri'] );
+        $this->assertEquals( 0, $response['meta']['cursor']['current']);
+        $this->assertEquals( 0, $response['meta']['cursor']['prev']);
+        $this->assertEquals( 1, $response['meta']['cursor']['next']);
+        $this->assertEquals( 1, $response['meta']['cursor']['count']);
+
+        $crawler = $this->client->request(
+                         'GET',
+                         '/businesses?cursor=1&previous=0&limit=1',
+                         array(),
+                         array(),
+                         array('CONTENT_TYPE' => 'application/json'));
+
+        $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
+        $response = json_decode($this->client->getResponse()->getContent(), true);
+        $this->assertEquals(1, count($response['data']));
+        $this->assertEquals( 'Fixtured business2', $response['data'][0]['name'] );
+        $this->assertEquals( 'Fake description2', $response['data'][0]['description'] );
+        $this->assertContains( '/businesses/', $response['data'][0]['links']['self']['uri'] );
+        $this->assertEquals( 1, $response['meta']['cursor']['current']);
+        $this->assertEquals( 0, $response['meta']['cursor']['prev']);
+        $this->assertEquals( 2, $response['meta']['cursor']['next']);
+        $this->assertEquals( 1, $response['meta']['cursor']['count']);
+
+    }
 
     private function getOneEntity()
     {
