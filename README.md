@@ -24,6 +24,7 @@ Step 2: Install Requirements
     composer require friendsofsymfony/user-bundle
     composer require aescarcha/user-bundle dev-master
     composer require league/fractal
+    composer require stof/doctrine-extensions-bundle
 
 
 Step 3: Enable the Bundle
@@ -43,6 +44,7 @@ class AppKernel extends Kernel
     {
         $bundles = array(
             // ...
+            new Stof\DoctrineExtensionsBundle\StofDoctrineExtensionsBundle(),
             new FOS\RestBundle\FOSRestBundle(),
             new FOS\UserBundle\FOSUserBundle(),
             new JMS\SerializerBundle\JMSSerializerBundle(),
@@ -93,8 +95,6 @@ Configure the bundles in `app/config/config.yml`
 
 Add this to `app/config/security.yml`
 
-    # app/config/security.yml
-
     security:
         encoders:
             FOS\UserBundle\Model\UserInterface: sha512
@@ -103,12 +103,14 @@ Add this to `app/config/security.yml`
             fos_userbundle:
                 id: fos_user.user_provider.username        # fos_user.user_provider.username_email does not seem to work (OAuth-spec related ("username + password") ?)
         firewalls:
+            oauth_token:                                   # Everyone can access the access token URL.
+                pattern: ^/oauth/v2/token
+                security: false
             api:
                 pattern: ^/                                # All URLs are protected
                 fos_oauth: true                            # OAuth2 protected resource
                 stateless: true                            # Do no set session cookies
                 anonymous: false                           # Anonymous access is not allowed
-
 
 Add the following to `app/config/routing.yml` to be able to use the docs :
 
@@ -117,6 +119,16 @@ Add the following to `app/config/routing.yml` to be able to use the docs :
         resource: "@NelmioApiDocBundle/Resources/config/routing.yml"
         prefix:   /api/doc
 
+
+Add to `app/config/services.yml`
+
+services:
+    gedmo.listener.timestampable:
+        class: Gedmo\Timestampable\TimestampableListener
+        tags:
+            - { name: doctrine.event_subscriber, connection: default }
+        calls:
+            - [ setAnnotationReader, [ "@annotation_reader" ] ]
 
 
 
