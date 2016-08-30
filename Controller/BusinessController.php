@@ -99,6 +99,34 @@ class BusinessController extends FOSRestController
         return $this->handleView($view);
     }
 
+    /**
+     * @ApiDoc(
+     *  resource=true,
+     *  description="Deletes a Business entity",
+     *  output="Aescarcha\BusinessBundle\Entity\Business",
+     *  requirements={
+     *      {"name"="entity", "dataType"="uuid", "description"="Unique id of the business entity"}
+     *  },
+     *  statusCodes={
+     *         200="Returned when entity was deleted",
+     *         404="Returned when entity is not found",
+     *     }
+     * )
+     */
+    public function deleteBusinessAction(Business $entity)
+    {
+        $fractal = new Manager();
+
+        $this->checkRights( $entity );
+
+        $em = $this->getDoctrine()->getManager();
+        $em->remove($entity);
+        $em->flush();
+
+        $resource = new Item($entity, new BusinessTransformer);
+        $view = $this->view($fractal->createData($resource)->toArray(), 200);
+        return $this->handleView($view);
+    }
 
     protected function newAction( Request $request )
     {
@@ -127,6 +155,15 @@ class BusinessController extends FOSRestController
         $view = $this->view($fractal->createData($resource)->toArray(), 400);
 
         return $this->handleView($view);
+    }
+
+    protected function checkRights( Business $entity )
+    {
+        $user = $this->get('security.token_storage')->getToken()->getUser();
+        
+        if($entity->getUser()->getId() !== $user->getId()){
+            throw $this->createAccessDeniedException( "You can't delete this entity." );
+        }
     }
 
 }

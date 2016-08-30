@@ -12,11 +12,13 @@ class BusinessControllerTest extends WebTestCase
     public function setUp()
     {
         $classes = array(
+            'Aescarcha\UserBundle\DataFixtures\ORM\LoadUserData',
             'Aescarcha\BusinessBundle\DataFixtures\ORM\LoadBusinessData',
         );
         $this->loadFixtures($classes);
         $this->client = static::createClient();
         $this->manager = $this->client->getContainer()->get('doctrine.orm.entity_manager');
+        $this->login();
     }
 
     public function testCreate()
@@ -115,13 +117,15 @@ class BusinessControllerTest extends WebTestCase
         $this->assertEquals( 0, $response['meta']['cursor']['prev']);
         $this->assertEquals( 1, $response['meta']['cursor']['next']);
         $this->assertEquals( 1, $response['meta']['cursor']['count']);
+    }
 
+    public function testIndexPagination2(){
         $crawler = $this->client->request(
-                         'GET',
-                         '/businesses?cursor=1&previous=0&limit=1',
-                         array(),
-                         array(),
-                         array('CONTENT_TYPE' => 'application/json'));
+                                          'GET',
+                                          '/businesses?cursor=1&previous=0&limit=1',
+                                          array(),
+                                          array(),
+                                          array('CONTENT_TYPE' => 'application/json'));
 
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
         $response = json_decode($this->client->getResponse()->getContent(), true);
@@ -133,12 +137,58 @@ class BusinessControllerTest extends WebTestCase
         $this->assertEquals( 0, $response['meta']['cursor']['prev']);
         $this->assertEquals( 2, $response['meta']['cursor']['next']);
         $this->assertEquals( 1, $response['meta']['cursor']['count']);
+    }
 
+    public function testDelete()
+    {
+        $entity = $this->getOneEntity();
+        $crawler = $this->client->request(
+                                          'DELETE',
+                                          '/businesses/' . $entity->getId(),
+                                          array(),
+                                          array(),
+                                          array('CONTENT_TYPE' => 'application/json'));
+
+        $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
+        $response = json_decode($this->client->getResponse()->getContent(), true);
+        $this->assertEquals( $entity->getName() , $response['data']['name'] );
+        $this->assertEquals( $entity->getDescription(), $response['data']['description'] );
+        $this->assertEquals( '/businesses/' . $entity->getId(), $response['data']['links']['self']['uri'] );
+
+        $crawler = $this->client->request(
+                                          'GET',
+                                          '/businesses/' . $entity->getId(),
+                                          array(),
+                                          array(),
+                                          array('CONTENT_TYPE' => 'application/json'));
+        $this->assertEquals(404, $this->client->getResponse()->getStatusCode());
     }
 
     private function getOneEntity()
     {
         return $this->manager->getRepository('AescarchaBusinessBundle:Business')->findAll()[0];
+    }
+
+    /**
+     * Fake Login, @todo move this to use auth token
+     * @param  string $userName
+     */
+    protected function login( $userName = 'Alvaro')
+    {
+        $session = $this->client->getContainer()->get('session');
+        $container = $this->client->getContainer();
+        $userManager = $container->get('fos_user.user_manager');
+        $loginManager = $container->get('fos_user.security.login_manager');
+        $firewallName = $container->getParameter('fos_user.firewall_name');
+        $user = $userManager->findUserBy(array('username' => $userName));
+        $loginManager->loginUser($firewallName, $user);
+        $container->get('session')->set('_security_' . $firewallName,
+                                        serialize($container->get('security.token_storage')->getToken()));
+        $container->get('session')->set('_locale', $user->getLocale());
+
+        $container->get('session')->save();
+        $this->client->getCookieJar()->set(new \Symfony\Component\BrowserKit\Cookie($session->getName(), $session->getId()));
+        return $user;
     }
 
 }

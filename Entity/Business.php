@@ -4,6 +4,7 @@ namespace Aescarcha\BusinessBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
  * Business
@@ -21,6 +22,12 @@ class Business
      * @ORM\GeneratedValue(strategy="UUID")
      */
     private $id;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Aescarcha\UserBundle\Entity\User", fetch="EAGER")
+     */
+    protected $user;
+
 
     /**
      * @var string
@@ -52,6 +59,22 @@ class Business
      * @ORM\Column(name="longitude", type="float", nullable=true)
      */
     private $longitude;
+
+    /**
+     * @var \DateTime
+     *
+     * @Gedmo\Timestampable(on="create")
+     * @ORM\Column(name="created", type="datetime")
+     */
+    protected $created;
+
+    /**
+     * @var \DateTime
+     *
+     * @Gedmo\Timestampable(on="update")
+     * @ORM\Column(name="updated", type="datetime")
+     */
+    protected $updated;
 
 
     /**
@@ -159,5 +182,75 @@ class Business
     {
         return $this->longitude;
     }
+
+    /**
+     * Set user
+     *
+     * @param \Aescarcha\UserBundle\Entity\User $user
+     * @return Business
+     */
+    public function setUser($user)
+    {
+        $this->user = $user;
+
+        return $this;
+    }
+
+    /**
+     * Get user
+     *
+     * @return \Aescarcha\UserBundle\Entity\User $user
+     */
+    public function getUser()
+    {
+        return $this->user;
+    }
+
+    /**
+     * Set created
+     *
+     * @param \DateTime $created
+     * @return Post
+     */
+    public function setCreated($created)
+    {
+        $this->created = $created;
+
+        return $this;
+    }
+
+    /**
+     * Get created
+     *
+     * @return \DateTime
+     */
+    public function getCreated()
+    {
+        return $this->created;
+    }
+
+    /**
+     * Set updated
+     *
+     * @param \DateTime $updated
+     * @return Post
+     */
+    public function setUpdated($updated)
+    {
+        $this->updated = $updated;
+
+        return $this;
+    }
+
+    /**
+     * Get updated
+     *
+     * @return \DateTime
+     */
+    public function getUpdated()
+    {
+        return $this->updated;
+    }
+
 }
 
