@@ -39,6 +39,23 @@ class BusinessController extends FOSRestController
     /**
      * @ApiDoc(
      *  resource=true,
+     *  description="Update a Business Object",
+     *  input="Aescarcha\BusinessBundle\Entity\Business",
+     *  output="Aescarcha\BusinessBundle\Entity\Business",
+     *  statusCodes={
+     *         200="Returned when update is successful",
+     *         400="Returned when data is invalid",
+     *     }
+     * )
+     */
+    public function patchBusinessesAction( Request $request, Business $entity )
+    {
+        return $this->updateAction( $request, $entity );
+    }
+
+    /**
+     * @ApiDoc(
+     *  resource=true,
      *  description="Finds an displays a Business entity",
      *  output="Aescarcha\BusinessBundle\Entity\Business",
      *  requirements={
@@ -146,6 +163,36 @@ class BusinessController extends FOSRestController
             $em->flush();
             $resource = new Item($entity, new BusinessTransformer);
             $view = $this->view($fractal->createData($resource)->toArray(), 201);
+            return $this->handleView($view);
+        }
+
+        //This serializer won't set the "data" namespace for errors
+        $fractal->setSerializer(new ArraySerializer());
+        $resource = new Item($errors->get(0), new ErrorTransformer);
+        $view = $this->view($fractal->createData($resource)->toArray(), 400);
+
+        return $this->handleView($view);
+    }
+
+    protected function updateAction( Request $request, Business $entity )
+    {
+        $this->checkRights( $entity );
+        
+        $validator = $this->get('validator');
+        $fractal = new Manager();
+
+        $entity->setName($request->request->get('name'));
+        $entity->setDescription($request->request->get('description'));
+        $entity->setLatitude($request->request->get('latitude'));
+        $entity->setLongitude($request->request->get('longitude'));
+
+        $errors = $validator->validate($entity);
+        if ( count($errors) === 0 ) {
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($entity);
+            $em->flush();
+            $resource = new Item($entity, new BusinessTransformer);
+            $view = $this->view($fractal->createData($resource)->toArray(), 200);
             return $this->handleView($view);
         }
 
