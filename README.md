@@ -91,7 +91,7 @@ Configure the bundles in `app/config/config.yml`
         firewall_name: api                                  # Seems to be used when registering user/reseting password,
                                                             # but since there is no "login", as so it seems to be useless in
                                                             # our particular context, but still required by "FOSUserBundle"
-        user_class: FOS\UserBundle\Model\User
+        user_class: Aescarcha\UserBundle\Entity\User
 
 Add this to `app/config/security.yml`
 
