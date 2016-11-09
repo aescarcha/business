@@ -66,6 +66,7 @@ Step 4: Configure the Bundle
 Enable the routes in `app/config/routing.yml`
 
     aescarcha_business:
+        type: rest
         resource: "@AescarchaBusinessBundle/Resources/config/routing.yml"
         prefix:   /
 
