@@ -155,6 +155,7 @@ class BusinessController extends FOSRestController
         $entity->setDescription($request->request->get('description'));
         $entity->setLatitude($request->request->get('latitude'));
         $entity->setLongitude($request->request->get('longitude'));
+        $entity->setUser($this->get('security.token_storage')->getToken()->getUser());
 
         $errors = $validator->validate($entity);
         if ( count($errors) === 0 ) {

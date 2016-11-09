@@ -6,6 +6,8 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Gedmo\Mapping\Annotation as Gedmo;
 
+use Symfony\Component\Security\Core\User\UserInterface;
+
 /**
  * Business
  *
@@ -25,6 +27,7 @@ class Business
 
     /**
      * @ORM\ManyToOne(targetEntity="Aescarcha\UserBundle\Entity\User", fetch="EAGER")
+     * @Assert\NotNull()
      */
     protected $user;
 
@@ -189,7 +192,7 @@ class Business
      * @param \Aescarcha\UserBundle\Entity\User $user
      * @return Business
      */
-    public function setUser($user)
+    public function setUser(UserInterface $user)
     {
         $this->user = $user;
 

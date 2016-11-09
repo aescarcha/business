@@ -34,6 +34,7 @@ class BusinessControllerTest extends WebTestCase
         $this->assertEquals(201, $this->client->getResponse()->getStatusCode());
         $response = json_decode($this->client->getResponse()->getContent(), true);
         $this->assertEquals( 'my unit test', $response['data']['name'] );
+        $this->assertEquals( 1, $response['data']['user_id'] );
         $this->assertContains( '/businesses/', $response['data']['links']['self']['uri'] );
     }
 
@@ -62,6 +63,7 @@ class BusinessControllerTest extends WebTestCase
 
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
         $response = json_decode($this->client->getResponse()->getContent(), true);
+        $this->assertEquals( 1, $response['data']['user_id'] );
         $this->assertEquals( 'Fixtured business', $response['data']['name'] );
         $this->assertEquals( 'Fake description', $response['data']['description'] );
         $this->assertEquals( '/businesses/' . $id, $response['data']['links']['self']['uri'] );
@@ -177,6 +179,7 @@ class BusinessControllerTest extends WebTestCase
                          );
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
         $response = json_decode($this->client->getResponse()->getContent(), true);
+        $this->assertEquals( $entity->getUser()->getId(), $response['data']['user_id'] );
         $this->assertEquals( 'my unit test edited', $response['data']['name'] );
         $this->assertContains( '/businesses/' . $entity->getId(), $response['data']['links']['self']['uri'] );
     }

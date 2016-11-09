@@ -11,6 +11,7 @@ class BusinessTransformer extends Fractal\TransformerAbstract
         return [
             'id'      => $business->getId(),
             'name'   => $business->getName(),
+            'user_id'   => $business->getUser()->getId(),
             'description'   => $business->getDescription(),
             'longitude'    => (float) $business->getLongitude(),
             'latitude'    => (float) $business->getLatitude(),
