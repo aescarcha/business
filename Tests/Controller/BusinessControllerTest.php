@@ -160,6 +160,40 @@ class BusinessControllerTest extends WebTestCase
         $this->assertEquals( 1, $response['meta']['cursor']['count']);
     }
 
+    public function testIndexFiltered(){
+        $crawler = $this->client->request(
+                                          'GET',
+                                          '/businesses?longitude=40.486946&latitude=-3.704084&distance=10', //we can find 40.486944, -3.724083
+                                          array(),
+                                          array(),
+                                          array('CONTENT_TYPE' => 'application/json'));
+
+        $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
+        $response = json_decode($this->client->getResponse()->getContent(), true);
+        $this->assertEquals(1, count($response['data']));
+        $this->assertEquals( 'Fixtured business', $response['data'][0]['name'] );
+        $this->assertEquals( 'Fake description', $response['data'][0]['description'] );
+        $this->assertContains( '/businesses/', $response['data'][0]['links']['self']['uri'] );
+        $this->assertEquals( 0, $response['meta']['cursor']['current']);
+        $this->assertEquals( 0, $response['meta']['cursor']['prev']);
+        $this->assertEquals( 10, $response['meta']['cursor']['next']);
+        $this->assertEquals( 1, $response['meta']['cursor']['count']);
+    }
+
+
+    public function testIndexFilteredNoneFound(){
+        $crawler = $this->client->request(
+                                          'GET',
+                                          '/businesses?longitude=35.486946&latitude=-3.704084&distance=10',
+                                          array(),
+                                          array(),
+                                          array('CONTENT_TYPE' => 'application/json'));
+
+        $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
+        $response = json_decode($this->client->getResponse()->getContent(), true);
+        $this->assertEquals(0, count($response['data']));
+    }
+
     public function testDelete()
     {
         $entity = $this->getOneEntity();

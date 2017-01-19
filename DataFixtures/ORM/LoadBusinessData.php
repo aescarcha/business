@@ -11,10 +11,14 @@ class LoadBusinessData implements FixtureInterface
         [
             'name' => 'Fixtured business',
             'description' => 'Fake description',
+            'longitude' => 40.486944,
+            'latitude' => -3.724083,
         ],
         [
             'name' => 'Fixtured business2',
             'description' => 'Fake description2',
+            'longitude' => 41.486944,
+            'latitude' => -2.724083,
         ]
     ];
 
@@ -26,6 +30,8 @@ class LoadBusinessData implements FixtureInterface
             $entity->setName($data['name']);
             $entity->setDescription($data['description']);
             $entity->setUser($user);
+            $entity->setLongitude($data['longitude']);
+            $entity->setLatitude($data['latitude']);
             $manager->persist($entity);
         }
 

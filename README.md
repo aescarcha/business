@@ -25,6 +25,8 @@ Step 2: Install Requirements
     composer require aescarcha/user-bundle dev-master
     composer require league/fractal
     composer require stof/doctrine-extensions-bundle
+    composer require stof/doctrine-extensions-bundle
+    composer require beberlei/DoctrineExtensions
 
 
 Step 3: Enable the Bundle
@@ -59,6 +61,13 @@ class AppKernel extends Kernel
     // ...
 }
 ```
+
+
+Register doctrine extensions in `app/autoload.php`, this is required for distance querying businesses
+
+    $classLoader = new \Doctrine\Common\ClassLoader('DoctrineExtensions', __DIR__.'/../vendor/beberlei-doctrine-extensions');
+    $classLoader->register();
+
 
 Step 4: Configure the Bundle
 -------------------------

@@ -10,9 +10,43 @@ namespace Aescarcha\BusinessBundle\Repository;
  */
 class BusinessRepository extends \Doctrine\ORM\EntityRepository
 {
+    public function __construct($em, \Doctrine\ORM\Mapping\ClassMetadata $class)
+    {
+        parent::__construct($em, $class);
+        //This requires  "beberlei/DoctrineExtensions", maybe use createNativeQuery instead of adding extensions?
+        $config = $this->getEntityManager()->getConfiguration();
+        $config->addCustomNumericFunction('RADIANS', 'DoctrineExtensions\Query\Mysql\Radians');
+        $config->addCustomNumericFunction('ACOS', 'DoctrineExtensions\Query\Mysql\Acos');
+        $config->addCustomNumericFunction('COS', 'DoctrineExtensions\Query\Mysql\Cos');
+        $config->addCustomNumericFunction('SIN', 'DoctrineExtensions\Query\Mysql\Sin');
+    }
     public function findByConditions( array $criteria, $returnQuery = true )
     {
         $qb = $this->createQueryBuilder('p');
+        $qb->select('p');
+        if(isset( $criteria['longitude'] ) && isset($criteria['latitude'])){
+            $distance = intval($criteria['distance']) ?? 10;
+            $longitude = floatval($criteria['longitude']);
+            $latitude = floatval($criteria['latitude']);
+            $qb->addSelect(
+        '( 3959 * acos(cos(radians(' . $latitude . '))' .
+            '* cos( radians( p.latitude ) )' .
+            '* cos( radians( p.longitude )' .
+            '- radians(' . $longitude . ') )' .
+            '+ sin( radians(' . $latitude . ') )' .
+            '* sin( radians( p.latitude ) ) ) ) AS HIDDEN distance')
+            ->having('distance < :distance')
+            ->setParameter('distance', $distance);
+
+            if(!isset($criteria['sort'])){
+                $qb->orderBy('distance', 'ASC');
+            }
+
+            unset($criteria['longitude']);
+            unset($criteria['latitude']);
+            unset($criteria['distance']);
+        };
+
         foreach ($criteria as $field => $value) {
             if($field === 'sort'){
                 if ($this->getClassMetadata()->hasField($value)) {
