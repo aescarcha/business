@@ -5,6 +5,7 @@ namespace Aescarcha\BusinessBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Gedmo\Mapping\Annotation as Gedmo;
+use Gedmo\SoftDeleteable\Traits\SoftDeleteableEntity;
 
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -16,6 +17,8 @@ use Symfony\Component\Security\Core\User\UserInterface;
  */
 class Business
 {
+    use SoftDeleteableEntity;
+    
     /**
      * @var int
      *
