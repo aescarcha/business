@@ -60,9 +60,12 @@ class BusinessAssetControllerTest extends WebTestCase
         $this->assertEquals( 36, strlen($response['data']['id']) );
         $this->assertEquals( 'The bar pic', $response['data']['title'] );
         $this->assertEquals( false, $response['data']['isThumb'] );
+        $this->assertEquals( 1400, $response['data']['width'] );
+        $this->assertEquals( 937, $response['data']['height'] );
         $this->assertEquals( $entity->getId(), $response['data']['businessId'] );
         $this->assertContains( '/' . $response['data']['id'], $response['data']['path'] );
-        $this->assertContains( '/businesses/', $response['data']['links']['self']['uri'] );
+        $this->assertContains( '.jpg', $response['data']['path'] );
+        $this->assertContains( '/business-assets/', $response['data']['links']['self']['uri'] );
     }
 
     private function getOneEntity()

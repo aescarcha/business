@@ -55,11 +55,18 @@ class BusinessAssetController extends FOSRestController
         $entity->setTitle($request->request->get('title'));
         $entity->setIsThumb(intval($request->request->get('isThumb')));
         $entity->setBusiness($business);
-        $file = $this->handleFile($request->request->get('file'));
+        $file = self::handleFile($request->request->get('file'));
+        $errors = $file->getError();
 
-        $errors = $validator->validate($entity);
+        if(!$errors){
+            $errors = $validator->validate($entity);
+        }
+
         if ( count($errors) === 0 ) {
             $em = $this->getDoctrine()->getManager();
+            $em->persist($entity);
+            //move the file and save the path
+            $entity = self::moveFile( $file, $entity, $this->container->hasParameter('image_paths.businesses') ? $this->container->getParameter('image_paths.businesses') : "/var/www/waiter-assets/businesses/" );
             $em->persist($entity);
             $em->flush();
             $resource = new Item($entity, new BusinessAssetTransformer);
@@ -84,18 +91,54 @@ class BusinessAssetController extends FOSRestController
         }
     }
 
-    protected function handleFile( string $fileData )
+    protected static function handleFile( string $fileData )
     {
         $fileData = base64_decode($fileData);
         $file = tmpfile();
         if ($file === false) 
             throw new \Exception('File can not be opened.');
 
-        $path = stream_get_meta_data($file)['uri'];
+        $path = stream_get_meta_data($file)['uri'] . '-nontemp';
         file_put_contents($path, $fileData);
 
-        $uploadedFile = new UploadedFile($path, $path, null, null, null, true);
+        $size = getimagesize($path); 
+        if ($size === false) 
+            throw new \Exception('File is not an image.');
+
+        $uploadedFile = new UploadedFile($path, $path, mime_content_type($path), null, null, true);
         return $uploadedFile;
+    }
+
+    protected static function moveFile( UploadedFile $file, BusinessAsset $businessAsset, $basePath )
+    {
+        $partialPath = substr($businessAsset->getBusiness()->getId(), 0,2) . '/' . substr($businessAsset->getBusiness()->getId(), 2, 2) . '/' . $businessAsset->getBusiness()->getId() . '/';
+        $finalPath = $basePath . $partialPath;
+        $fileName = $businessAsset->getId();
+
+        $file = $file->move( $file->getPathName() . '-existing' , "test");
+
+        $size = getimagesize($file->getPathName()); 
+
+        switch ($size['mime']) { 
+            case "image/gif": 
+                $fileName .= '.gif';
+            break; 
+            case "image/jpeg": 
+                $fileName .= '.jpg';
+            break; 
+            case "image/png": 
+                $fileName .= '.png';
+            break; 
+            case "image/bmp": 
+                $fileName .= '.bmp';
+            break; 
+        } 
+        $file = $file->move( $finalPath, $fileName);
+
+        $businessAsset->setPath('/' . $partialPath . $fileName);
+        $businessAsset->setWidth($size[0]);
+        $businessAsset->setHeight($size[1]);
+        return $businessAsset;
     }
 
 
