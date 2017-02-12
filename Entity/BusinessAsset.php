@@ -12,7 +12,7 @@ use Gedmo\Timestampable\Traits\TimestampableEntity;
 /**
  * BusinessAsset
  *
- * @ORM\Table(name="business_asset")
+ * @ORM\Table(name="business_assets")
  * @ORM\Entity(repositoryClass="Aescarcha\BusinessBundle\Repository\BusinessAssetRepository")
  */
 class BusinessAsset
@@ -20,13 +20,13 @@ class BusinessAsset
 
     use SoftDeleteableEntity;
     use TimestampableEntity;
-    
+
     /**
      * @var int
      *
      * @ORM\Column(name="id", type="guid")
      * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
+     * @ORM\GeneratedValue(strategy="UUID")
      */
     private $id;
 
@@ -40,7 +40,7 @@ class BusinessAsset
     private $title;
 
     /**
-     * @var guid
+     * @var Entity\Business
      *
      * @ORM\ManyToOne(targetEntity="Aescarcha\BusinessBundle\Entity\Business", fetch="EAGER")
      * @Assert\NotNull()
@@ -74,6 +74,20 @@ class BusinessAsset
      * @ORM\Column(name="height", type="integer", nullable=true)
      */
     private $height;
+
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="sort_order", type="integer", nullable=false)
+     */
+    private $order = 1;
+
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="isThumb", type="integer", nullable=false, options={"default" : 0})
+     */
+    private $isThumb = 0;
 
 
     /**
@@ -111,27 +125,27 @@ class BusinessAsset
     }
 
     /**
-     * Set businessId
+     * Set business
      *
-     * @param guid $businessId
+     * @param guid $business
      *
      * @return BusinessAsset
      */
-    public function setBusinessId($businessId)
+    public function setBusiness($business)
     {
-        $this->businessId = $businessId;
+        $this->business = $business;
 
         return $this;
     }
 
     /**
-     * Get businessId
+     * Get business
      *
-     * @return guid
+     * @return Entity\Business
      */
-    public function getBusinessId()
+    public function getBusiness()
     {
-        return $this->businessId;
+        return $this->business;
     }
 
     /**
@@ -228,6 +242,55 @@ class BusinessAsset
     public function getHeight()
     {
         return $this->height;
+    }
+
+
+    /**
+     * Set order
+     *
+     * @param integer $order
+     *
+     * @return BusinessAsset
+     */
+    public function setOrder($order)
+    {
+        $this->order = $order;
+
+        return $this;
+    }
+
+    /**
+     * Get order
+     *
+     * @return int $order
+     */
+    public function getOrder()
+    {
+        return $this->order;
+    }
+
+    /**
+     * Set isThumb
+     *
+     * @param integer $isThumb
+     *
+     * @return BusinessAsset
+     */
+    public function setIsThumb($isThumb)
+    {
+        $this->isThumb = $isThumb;
+
+        return $this;
+    }
+
+    /**
+     * Get isThumb
+     *
+     * @return int isThumb
+     */
+    public function getIsThumb()
+    {
+        return $this->isThumb;
     }
 }
 

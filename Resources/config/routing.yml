@@ -1,3 +1,10 @@
 business:
     type: rest
     resource: Aescarcha\BusinessBundle\Controller\BusinessController
+business_asset:
+    type: rest
+    parent: business
+    resource: Aescarcha\BusinessBundle\Controller\BusinessAssetController
+asset:
+    type: rest
+    resource: Aescarcha\BusinessBundle\Controller\BusinessAssetController
