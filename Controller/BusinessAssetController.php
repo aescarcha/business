@@ -44,6 +44,36 @@ class BusinessAssetController extends FOSRestController
         return $this->newAction( $request, $business );
     }
 
+    /**
+     * @Get("/businesses/{business}/assets")
+     * @ApiDoc(
+     *  resource=true,
+     *  description="Get a Business Asset Objects",
+     *  output="Aescarcha\BusinessBundle\Entity\BusinessAsset",
+     *  requirements={
+     *      {"name"="entity", "dataType"="uuid", "description"="Unique id of the business entity"}
+     *  },
+     *  statusCodes={
+     *         200="Returned when entity exists",
+     *         404="Returned when entity is not found",
+     *     }
+     * )
+     */
+    public function getBusinessAssetsAction( Request $request, Business $business )
+    {
+        $repository = $this->getDoctrine()->getManager()->getRepository('AescarchaBusinessBundle:BusinessAsset');
+        $fractal = new Manager();
+
+        $entities = $repository->findByBusiness( $business )
+                            ->getQuery()
+                            ->getResult(); 
+
+        $resource = new Collection($entities, new BusinessAssetTransformer);
+
+        $view = $this->view($fractal->createData($resource)->toArray(), 200);
+        return $this->handleView($view);
+    }
+
 
     protected function newAction( Request $request, Business $business )
     {

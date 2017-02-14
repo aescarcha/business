@@ -40,7 +40,7 @@ class BusinessAssetControllerTest extends WebTestCase
     }
 
 
-    public function testUploadBusinessImage()
+    public function testUploadBusiness()
     {
         $entity = $this->getOneEntity();
         $image = base64_encode(file_get_contents(__DIR__ . '/bar.jpg'));
@@ -65,7 +65,30 @@ class BusinessAssetControllerTest extends WebTestCase
         $this->assertEquals( $entity->getId(), $response['data']['businessId'] );
         $this->assertContains( '/' . $response['data']['id'], $response['data']['path'] );
         $this->assertContains( '.jpg', $response['data']['path'] );
-        $this->assertContains( '/business-assets/', $response['data']['links']['self']['uri'] );
+        $this->assertContains( '/business-assets/' .  $response['data'][0]['id'], $response['data']['links']['self']['uri'] );
+    }
+
+    public function testGetAssets()
+    {
+        $entity = $this->getOneEntity();
+        $crawler = $this->client->request('GET',
+                                          '/businesses/' . $entity->getId() . '/assets',
+                                          [],
+                                          [],
+                                          array('CONTENT_TYPE' => 'application/json')
+                                          );
+
+        $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
+        $response = json_decode($this->client->getResponse()->getContent(), true);
+        $this->assertEquals( 36, strlen($response['data'][0]['id']) );
+        $this->assertEquals( 'fixtured bar 2', $response['data'][0]['title'] );
+        $this->assertEquals( true, $response['data'][0]['isThumb'] );
+        $this->assertEquals( 1400, $response['data'][0]['width'] );
+        $this->assertEquals( 937, $response['data'][0]['height'] );
+        $this->assertEquals( $entity->getId(), $response['data'][0]['businessId'] );
+        $this->assertContains( '.jpg', $response['data'][0]['path'] );
+        $this->assertContains( '/' . $response['data'][0]['id'], $response['data'][0]['path'] );
+        $this->assertContains( '/business-assets/' .  $response['data'][0]['id'], $response['data'][0]['links']['self']['uri'] );
     }
 
     private function getOneEntity()

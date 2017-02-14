@@ -2,6 +2,8 @@
 
 namespace Aescarcha\BusinessBundle\Repository;
 
+use Aescarcha\BusinessBundle\Entity\Business;
+
 /**
  * BusinessAssetRepository
  *
@@ -10,4 +12,11 @@ namespace Aescarcha\BusinessBundle\Repository;
  */
 class BusinessAssetRepository extends \Doctrine\ORM\EntityRepository
 {
+    public function findByBusiness( Business $business, $returnQuery = true )
+    {
+        $qb = $this->createQueryBuilder('p');
+                $qb->where($qb->expr()->eq('p.business', ':p_business'))
+                ->setParameter('p_business', $business);
+        return $returnQuery ? $qb : $qb->getQuery()->getResult();
+    }
 }
