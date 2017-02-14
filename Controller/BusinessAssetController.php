@@ -85,6 +85,7 @@ class BusinessAssetController extends FOSRestController
         $entity->setTitle($request->request->get('title'));
         $entity->setIsThumb(intval($request->request->get('isThumb')));
         $entity->setBusiness($business);
+        $entity->setorder( $business->getBusinessAssets()->count() + 1 );
         $file = self::handleFile($request->request->get('file'));
         $errors = $file->getError();
 

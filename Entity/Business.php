@@ -2,6 +2,8 @@
 
 namespace Aescarcha\BusinessBundle\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Gedmo\Mapping\Annotation as Gedmo;
@@ -67,6 +69,17 @@ class Business
     private $longitude;
 
     /**
+     * @ORM\OneToMany(targetEntity="BusinessAsset", mappedBy="business", fetch="EXTRA_LAZY")
+     * @Assert\Count(
+     *      min = "0",
+     *      max = "500",
+     *      minMessage = "You must add at least one Asset",
+     *      maxMessage = "You cannot add more than {{ limit }} assets"
+     *      )
+     */
+    private $businessAssets;
+
+    /**
      * @var \DateTime
      *
      * @Gedmo\Timestampable(on="create")
@@ -81,6 +94,11 @@ class Business
      * @ORM\Column(name="updated", type="datetime")
      */
     protected $updated;
+
+    public function __construct()
+    {
+        $this->businessAssets = new ArrayCollection();
+    }
 
 
     /**
@@ -256,6 +274,49 @@ class Business
     public function getUpdated()
     {
         return $this->updated;
+    }
+
+    /**
+     * Get BusinessAssets
+     *
+     * @return ArrayCollection BusinessAsset
+     */
+    public function getBusinessAssets()
+    {
+        return $this->businessAssets;
+    }
+
+    /**
+     * Get BusinessAssets
+     *
+     * @param ArrayCollection BusinessAsset
+     * @return Business
+     */
+    public function setBusinessAssets( ArrayCollection $businessAssets )
+    {
+        $this->businessAssets = $businessAssets;
+        return $this;
+    }
+
+    /**
+     * Add BusinessAssets
+     *
+     * @param BusinessAsset BusinessAsset
+     * @return Business
+     */
+    public function addBusinessAsset( BusinessAsset $businessAsset )
+    {
+        $this->businessAssets->add($businessAsset);
+        return $this;
+    }
+
+    /**
+     * Get the thumbnail from the asset collection
+     * @return BusinessAsset
+     */
+    public function getThumb()
+    {
+        return $this->getBusinessAssets()->where('isThumb', 1);
     }
 
 }
