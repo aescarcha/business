@@ -15,6 +15,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
  * Business
  *
  * @ORM\Table(name="business")
+ * @Gedmo\SoftDeleteable(fieldName="deletedAt")
  * @ORM\Entity(repositoryClass="Aescarcha\BusinessBundle\Repository\BusinessRepository")
  */
 class Business

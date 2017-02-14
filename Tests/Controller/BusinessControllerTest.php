@@ -210,6 +210,21 @@ class BusinessControllerTest extends WebTestCase
         $this->assertEquals( $entity->getDescription(), $response['data']['description'] );
         $this->assertEquals( '/businesses/' . $entity->getId(), $response['data']['links']['self']['uri'] );
 
+        $this->client = static::createClient();
+        $this->login();
+        $crawler = $this->client->request(
+                         'GET',
+                         '/businesses',
+                         array(),
+                         array(),
+                         array('CONTENT_TYPE' => 'application/json'));
+
+        $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
+        $response = json_decode($this->client->getResponse()->getContent(), true);
+        $this->assertCount(1, $response['data']);
+
+        $this->client = static::createClient();
+        $this->login();
         $crawler = $this->client->request(
                                           'GET',
                                           '/businesses/' . $entity->getId(),
@@ -248,6 +263,30 @@ class BusinessControllerTest extends WebTestCase
         $this->assertEquals( 'name', $response['error']['property'] );
         $this->assertEquals( 'This value should not be blank.', $response['error']['message'] );
         $this->assertEquals( '', $response['error']['doc_url'] );
+    }
+
+    public function testGetWithAssets()
+    {
+      $id = $this->getOneEntity()->getId();
+
+      $crawler = $this->client->request(
+                                        'GET',
+                                        '/businesses/' . $id . '?embed=businessAssets',
+                                        array(),
+                                        array(),
+                                        array('CONTENT_TYPE' => 'application/json'));
+
+      $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
+      $response = json_decode($this->client->getResponse()->getContent(), true);
+      $this->assertEquals( 1, $response['data']['user_id'] );
+      $this->assertEquals( 'Fixtured business', $response['data']['name'] );
+      $this->assertEquals( 'Fake description', $response['data']['description'] );
+      $this->assertEquals( 'Fake description', $response['data']['description'] );
+      $this->assertEquals( 'fixtured bar 2', $response['data']['businessAssets']['data'][0]['title'] );
+      $this->assertEquals( 36, strlen($response['data']['businessAssets']['data'][0]['id']) );
+      $this->assertContains($response['data']['businessAssets']['data'][0]['id'], $response['data']['businessAssets']['data'][0]['path'] );
+      $this->assertContains($id, $response['data']['businessAssets']['data'][0]['path'] );
+      $this->assertEquals( '/businesses/' . $id, $response['data']['links']['self']['uri'] );
     }
 
     private function getOneEntity()

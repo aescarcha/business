@@ -2,10 +2,21 @@
 namespace Aescarcha\BusinessBundle\Transformer;
 
 use Aescarcha\BusinessBundle\Entity\Business;
+use Aescarcha\BusinessBundle\Entity\BusinessAsset;
+use Aescarcha\BusinessBundle\Transformer\BusinessAssetTransformer;
 use League\Fractal;
 
 class BusinessTransformer extends Fractal\TransformerAbstract
 {
+    /**
+     * List of resources possible to include
+     *
+     * @var array
+     */
+    protected $availableIncludes = [
+        'businessAssets',
+    ];
+
     public function transform( Business $business )
     {
         return [
@@ -23,6 +34,19 @@ class BusinessTransformer extends Fractal\TransformerAbstract
             ],
         ];
     }
+
+    /**
+     * Include BusinessAssets
+     *
+     * @return League\Fractal\ItemResource
+     */
+    public function includeBusinessAssets(Business $entity)
+    {
+        $entities = $entity->getBusinessAssets();
+
+        return $this->collection($entities, new BusinessAssetTransformer);
+    }
+
 
 }
 

@@ -103,6 +103,13 @@ Configure the bundles in `app/config/config.yml`
                                                             # our particular context, but still required by "FOSUserBundle"
         user_class: Aescarcha\UserBundle\Entity\User
 
+    orm:
+        filters:
+            softdeleteable:
+                class: Gedmo\SoftDeleteable\Filter\SoftDeleteableFilter
+                enabled: true
+
+
 Add this to `app/config/security.yml`
 
     security:
@@ -139,6 +146,15 @@ services:
             - { name: doctrine.event_subscriber, connection: default }
         calls:
             - [ setAnnotationReader, [ "@annotation_reader" ] ]
+
+
+    gedmo.listener.softdeleteable:
+        class: Gedmo\SoftDeleteable\SoftDeleteableListener
+        tags:
+            - { name: doctrine.event_subscriber, connection: default }
+        calls:
+            - [ setAnnotationReader, [ "@annotation_reader" ] ]
+
 
 
 

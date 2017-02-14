@@ -67,9 +67,11 @@ class BusinessController extends FOSRestController
      *     }
      * )
      */
-    public function getBusinessAction(Business $entity)
+    public function getBusinessAction(Request $request, Business $entity)
     {
         $fractal = new Manager();
+        $fractal->parseIncludes($request->query->get('embed', []));
+
         $resource = new Item($entity, new BusinessTransformer);
         $view = $this->view($fractal->createData($resource)->toArray(), 200);
         return $this->handleView($view);
