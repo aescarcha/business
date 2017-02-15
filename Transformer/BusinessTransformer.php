@@ -26,6 +26,8 @@ class BusinessTransformer extends Fractal\TransformerAbstract
             'description'   => $business->getDescription(),
             'longitude'    => (float) $business->getLongitude(),
             'latitude'    => (float) $business->getLatitude(),
+            //@TODO: Cache Thumb path in redis to avoid this non-needed query
+            'thumbnail'    => $business->getThumb() ? "images.waiterproject.com" . $business->getThumb()->getPath() : false,
             'links'   => [
                 'self' => [
                     'rel' => 'self',

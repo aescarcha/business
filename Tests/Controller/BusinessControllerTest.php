@@ -85,6 +85,9 @@ class BusinessControllerTest extends WebTestCase
         $this->assertEquals( 1, $response['data']['user_id'] );
         $this->assertEquals( 'Fixtured business', $response['data']['name'] );
         $this->assertEquals( 'Fake description', $response['data']['description'] );
+        $this->assertContains( $id, $response['data']['thumbnail'] );
+        $this->assertContains( 'jpg', $response['data']['thumbnail'] );
+        $this->assertContains( 'images.waiter', $response['data']['thumbnail'] );
         $this->assertEquals( '/businesses/' . $id, $response['data']['links']['self']['uri'] );
     }
 

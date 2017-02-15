@@ -3,6 +3,7 @@
 namespace Aescarcha\BusinessBundle\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Criteria;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -280,7 +281,7 @@ class Business
     /**
      * Get BusinessAssets
      *
-     * @return ArrayCollection BusinessAsset
+     * @return PersistentCollection BusinessAsset
      */
     public function getBusinessAssets()
     {
@@ -313,11 +314,13 @@ class Business
 
     /**
      * Get the thumbnail from the asset collection
+     * @TODO: Cache Thumb path in redis to avoid this non-needed query
      * @return BusinessAsset
      */
     public function getThumb()
     {
-        return $this->getBusinessAssets()->where('isThumb', 1);
+        $criteria = Criteria::create()->where(Criteria::expr()->eq("isThumb", 1));
+        return $this->getBusinessAssets()->matching( $criteria )->first();
     }
 
 }
