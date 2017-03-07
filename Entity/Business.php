@@ -11,7 +11,6 @@ use Gedmo\Mapping\Annotation as Gedmo;
 use Gedmo\SoftDeleteable\Traits\SoftDeleteableEntity;
 
 use Symfony\Component\Security\Core\User\UserInterface;
-
 /**
  * Business
  *

@@ -5,6 +5,7 @@ namespace Aescarcha\BusinessBundle\Controller;
 use FOS\RestBundle\Controller\FOSRestController;
 use Symfony\Component\HttpFoundation\Request;
 
+use Aescarcha\UserBundle\Entity\User;
 use Aescarcha\BusinessBundle\Entity\Business;
 use Aescarcha\BusinessBundle\Transformer\BusinessTransformer;
 use Aescarcha\BusinessBundle\Transformer\ErrorTransformer;
@@ -16,6 +17,7 @@ use League\Fractal\Pagination\Cursor;
 use League\Fractal\Serializer\ArraySerializer;
 
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
+use FOS\RestBundle\Controller\Annotations\Get;
 
 class BusinessController extends FOSRestController
 {
@@ -143,6 +145,52 @@ class BusinessController extends FOSRestController
         $em->flush();
 
         $resource = new Item($entity, new BusinessTransformer);
+        $view = $this->view($fractal->createData($resource)->toArray(), 200);
+        return $this->handleView($view);
+    }
+
+    /**
+     * @Get("/users/{user}/businesses")
+     * @ApiDoc(
+     *  resource=true,
+     *  description="Finds an displays Business entities from the user",
+     *  output="Aescarcha\BusinessBundle\Entity\Business",
+     *  requirements={
+     *      {"name"="user", "dataType"="id", "description"="Unique id of the User entity"}
+     *  },
+     *  statusCodes={
+     *         200="Returned when entity exists",
+     *         404="Returned when entity is not found",
+     *     }
+     * )
+     */
+    public function getUserBusinessesAction( Request $request, User $user )
+    {
+        $fractal = new Manager();
+        $businesses = $this->getDoctrine()->getManager()->getRepository('AescarchaBusinessBundle:Business');
+        
+        $loggedUser = $this->get('security.token_storage')->getToken()->getUser();
+        
+        if($user->getId() !== $loggedUser->getId()){
+            throw $this->createAccessDeniedException( "You can't acces this route." );
+        }
+
+        $currentCursor = $request->query->get('cursor', 0);
+        $previousCursor = $request->query->get('previous', 0);
+        $limit = $request->query->get('limit', 10);
+        $newCursor = $currentCursor + $limit;
+
+        $entities = $businesses->findByConditions(['user' => $user])
+        ->setFirstResult( $currentCursor )
+        ->setMaxResults( $limit )
+        ->getQuery()
+        ->getResult(); //Maybe we should turn hydration off for listing queries
+
+        $cursor = new Cursor($currentCursor, $previousCursor, $newCursor, count( $entities ));
+
+        $resource = new Collection($entities, new BusinessTransformer);
+        $resource->setCursor($cursor);
+
         $view = $this->view($fractal->createData($resource)->toArray(), 200);
         return $this->handleView($view);
     }

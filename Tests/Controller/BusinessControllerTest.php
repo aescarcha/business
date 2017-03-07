@@ -292,6 +292,28 @@ class BusinessControllerTest extends WebTestCase
       $this->assertEquals( '/businesses/' . $id, $response['data']['links']['self']['uri'] );
     }
 
+    public function testGetFromUser()
+    {
+        $userId = $this->getOneEntity()->getUser()->getId();
+
+        $crawler = $this->client->request(
+                         'GET',
+                         '/users/' . $userId . '/businesses',
+                         array(),
+                         array(),
+                         array('CONTENT_TYPE' => 'application/json'));
+
+        $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
+        $response = json_decode($this->client->getResponse()->getContent(), true);
+        $this->assertEquals( 1, $response['data'][0]['user_id'] );
+        $this->assertEquals( 'Fixtured business', $response['data'][0]['name'] );
+        $this->assertEquals( 'Fake description', $response['data'][0]['description'] );
+        $this->assertContains( $response['data'][0]['id'], $response['data'][0]['thumbnail'] );
+        $this->assertContains( 'jpg', $response['data'][0]['thumbnail'] );
+        $this->assertContains( 'images.waiter', $response['data'][0]['thumbnail'] );
+        $this->assertEquals( '/businesses/' . $response['data'][0]['id'], $response['data'][0]['links']['self']['uri'] );
+    }
+
     private function getOneEntity()
     {
         return $this->manager->getRepository('AescarchaBusinessBundle:Business')->findAll()[0];
