@@ -13,7 +13,7 @@ class BusinessAssetTransformer extends Fractal\TransformerAbstract
             'businessId'   => $entity->getBusiness()->getId(),
             'title'   => $entity->getTitle(),
             'type'   => $entity->getType(),
-            'path'   => $entity->getPath(),
+            'path'   => 'images.waiterproject.com' . $entity->getPath(),
             'isThumb'   => (bool)$entity->getIsThumb(),
             'order'   => intval($entity->getOrder()),
             'width'   => $entity->getWidth(),
@@ -21,7 +21,7 @@ class BusinessAssetTransformer extends Fractal\TransformerAbstract
             'links'   => [
                 'self' => [
                     'rel' => 'self',
-                    'uri' => 'images.waiterproject.com/business-assets/'.$entity->getId(),
+                    'uri' => '/business-assets/'.$entity->getId(),
                 ],
             ],
         ];
