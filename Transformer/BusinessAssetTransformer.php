@@ -21,7 +21,7 @@ class BusinessAssetTransformer extends Fractal\TransformerAbstract
             'links'   => [
                 'self' => [
                     'rel' => 'self',
-                    'uri' => '/business-assets/'.$entity->getId(),
+                    'uri' => 'images.waiterproject.com/business-assets/'.$entity->getId(),
                 ],
             ],
         ];
